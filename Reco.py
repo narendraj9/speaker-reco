@@ -1,5 +1,7 @@
 #!/usr/bin/env python2
 
+from __future__ import division
+
 import csv
 import os.path
 import logging
@@ -61,17 +63,17 @@ class RecoBlock():
             melwriter = csv.writer(ohandle)
             speakers = os.listdir(data_dir)
          
-            for skr_dir in speakers:
-                for soundclip in os.listdir(os.path.join(data_dir, skr_dir)):
+            for spkr_dir in speakers:
+                for soundclip in os.listdir(os.path.join(data_dir, spkr_dir)):
                     # generate mel coefficients for the current clip
-                    clip_path = os.path.abspath(os.path.join(data_dir, skr_dir, soundclip))
+                    clip_path = os.path.abspath(os.path.join(data_dir, spkr_dir, soundclip))
                     sample_rate, data = wavfile.read(clip_path)
                     ceps, mspec, spec = mfcc(data, fs=sample_rate)
                 
                     # write an entry into the training file for the current speaker
                     # the vector to store in csv file contains the speaker's name at the end 
                     fvec = self._mfcc_to_fvec(ceps)
-                    fvec.append(skr_dir)
+                    fvec.append(spkr_dir)
 
                     logging.debug(fvec) # see the numbers [as if they make sense ]
 
@@ -105,9 +107,23 @@ class RecoBlock():
         
         return self.recognizer.predict(fvec)
         
-    
-        
 if __name__ == "__main__":
     recoblock = RecoBlock("train_data")
-    print recoblock.predict("./test_data/test1.wav")
     
+    test_dir = os.path.abspath("test_data")
+    testset_size = 0
+    testset_error = 0
+
+    for spkr_dir in os.listdir(test_dir):
+        for soundclip in os.listdir(os.path.join(test_dir, spkr_dir)):
+            clippath = os.path.abspath(os.path.join(test_dir, spkr_dir))
+            prediction = recoblock.predict(clippath)
+
+            testset_size += 1
+            if prediction != spkr_dir:
+                testset_error += 1    
+    
+    if testset_size == 0:
+        print "No test data available."
+    else:
+        print "Error on test data: %f\n" (testset_error / testset_size * 100)
