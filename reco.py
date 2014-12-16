@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     for spkr_dir in os.listdir(test_dir):
         for soundclip in os.listdir(os.path.join(test_dir, spkr_dir)):
-            clippath = os.path.abspath(os.path.join(test_dir, spkr_dir))
+            clippath = os.path.abspath(os.path.join(test_dir, spkr_dir, soundclip))
             prediction = recoblock.predict(clippath)
 
             testset_size += 1
@@ -126,4 +126,4 @@ if __name__ == "__main__":
     if testset_size == 0:
         print "No test data available."
     else:
-        print "Error on test data: %f\n" (testset_error / testset_size * 100)
+        print "Error on test data: %.2f%%\n" % (testset_error / testset_size * 100)
