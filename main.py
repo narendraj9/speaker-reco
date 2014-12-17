@@ -1,14 +1,18 @@
 #!/usr/bin/env python2
 
 from __future__ import division
-import
+import subprocess
 from reco import RecoBlock
 
+recognizer = RecoBlock("train_data")
+
 def menu():
+    global recognizer
+
     # print menu 
     print "\n"
     menu_str = """Choose an option: 
-                      1) Train a recognizer
+                      1) Train the recognizer again
                       2) Test the trained recognizer
                       3) Exit
                """
@@ -21,10 +25,10 @@ def menu():
         # train a new recognizer
         recognizer = Recoblock("train_data")
     elif choice == 2:
-        # test an existing recognizer
-        recognizer = Recoblock("train_data")
-        cache_dir = "_melcache"
-        
+        # record a voice now and find out the speaker 
+        subprocess.call(["arecord", "-d", "5s", "-r", "48000", "_melcache/__test.wav"]) 
+        spkr = recognizer.predict("_melcache/__test.wav") 
+        print "The speker must be: %s" % spkr 
     elif choice == 3:
         exit(0)
     else:
