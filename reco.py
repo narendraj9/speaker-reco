@@ -33,8 +33,21 @@ class RecoBlock():
             logging.debug("_melcache already exists. Assuming training_data.csv exists too.")
 
         self.recognizer = svm.LinearSVC()
-        melv_list, speaker_ids = self._get_tdata(train_file)
+        melv_list, speaker_names = self._get_tdata(train_file)
         
+        # generate speaker_ids from speaker_names
+        self.spkr_ntoi = {}
+        self.spkr_iton = {}
+
+        i = 0 
+        for name in speaker_names:
+            if name not in self.spkr_ntoi:
+               self.spkr_ntoi[name] = i
+               self.spkr_iton[i] = name
+               i += 1
+        
+        speaker_ids = map(lambda n: self.spkr_ntoi[n], speaker_names)
+
         logging.debug(speaker_ids)
 
         # train a linear svm now
@@ -98,7 +111,9 @@ class RecoBlock():
         ceps = mfcc(data, sample_rate)
         fvec = self._mfcc_to_fvec(ceps)
         
-        return self.recognizer.predict(fvec)
+        speaker_id = self.recognizer.predict(fvec)[0]
+
+        return self.spkr_iton[speaker_id]
         
 if __name__ == "__main__":
     recoblock = RecoBlock("train_data")
